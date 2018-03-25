@@ -16,8 +16,11 @@
 
 -module(ais_json).
 
--export([ais_to_json/1]).
+-export([tagged_ais_to_json/1]).
 
-ais_to_json(_AIS) ->
-    ok.
-
+%% Function to convert a list of decoded AIS records to JSON. Consumes the 
+%% tagged form e.g. {ok, #ais{}} and steps over any sentences that 
+%% failed to decode.
+tagged_ais_to_json(AisRecs) ->
+    CnbList = aisle:extract_cnb_records(AisRecs),
+    CnbList.
