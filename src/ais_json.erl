@@ -23,4 +23,28 @@
 %% failed to decode.
 tagged_ais_to_json(AisRecs) ->
     CnbList = aisle:extract_cnb_records(AisRecs),
-    CnbList.
+    cnb_to_geojson(CnbList).
+
+%% Function to convert a list of CNB records to GeoJSON. 
+cnb_to_geojson(CnbList) when is_list(CnbList)  ->
+    PrepList = lists:map(fun cnb_prep/1, CnbList),
+    jsx:encode([{<<"data">>, PrepList}]).
+
+%% Collect the relevant data into a structure suitable for encoding using
+%% the jsx library.
+cnb_prep(AISrec) -> 
+    CNB = aisle:get_data(AISrec),
+    Timestamp = aisle:get_timestamp(CNB),
+    Lat = aisle:get_latitude(CNB),
+    Lon = aisle:get_longitude(CNB),
+    MMSI = aisle:get_mmsi(CNB),
+    gen_cnb_geojson(Timestamp, Lat, Lon, MMSI).
+
+%% Generate the GeoJSON for a CNB record.
+gen_cnb_geojson(TimeUtc, Lat, Lon, MMSI) ->
+    [{<<"type">>, <<"Feature">>},
+     {<<"properties">>, [{<<"timestamp">>, TimeUtc},
+                         {<<"type">>, <<"CNB">>},
+                         {<<"mmsi">>, MMSI}]},
+     {<<"geometry">>, [{<<"type">>, <<"Point">>},
+                       {<<"coordinates">>, [Lon, Lat]}]}].
