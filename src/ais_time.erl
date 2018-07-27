@@ -10,10 +10,7 @@ extract_datetime({ok, A} = AisRec) ->
         cnb     -> 
             {seconds, aisle:get_timestamp(Data)};  
         base_sr ->
-            io:format("Got a BSR~n"),
-            DateTime = aisle:get_bsr_datetime(Data),
-            io:format("DateTime ~p~n", [DateTime]),
-            DateTime; 
+            aisle:get_bsr_datetime(Data);
         _       -> 
             undefined
     end.
@@ -27,4 +24,5 @@ extract_time_info(AisRecs) when is_list(AisRecs) ->
                     Acc
             end
         end,
-    lists:foldl(F, [], AisRecs).
+    RevTime = lists:foldl(F, [], AisRecs),
+    lists:reverse(RevTime).
