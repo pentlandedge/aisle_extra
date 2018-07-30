@@ -2,6 +2,8 @@
 
 -export([extract_datetime/1, extract_time_info/1, construct_timeline/1]).
 
+-export([secs_diff/2]).
+
 %% Function to extract a datetime from an AIS record if one is available.
 extract_datetime({ok, A} = AisRec) ->
     MessageType = aisle:get_payload_type(AisRec),
@@ -41,9 +43,14 @@ construct_timeline(AisRecs) when is_list(AisRecs) ->
             case extract_bsrtime(AisRec) of
                 {ok, DateTime} -> 
                     io:format("DateTime ~p~n", [DateTime]),
-                    Diff = bsr_time_delta(DateTime, BsrTime), 
-                    io:format("Diff ~p~n", [Diff]),
-                    {DateTime, [AisRec|PendingRecs], Acc};
+                    Delta = bsr_time_delta(DateTime, BsrTime), 
+                    io:format("Delta ~p~n", [Delta]),
+                    io:format("AisRec: ~p~n", [AisRec]),
+                    NewRecs = map_pending_recs(BsrTime, Delta, PendingRecs),
+                    io:format("NewRecs ~p~n", [NewRecs]),
+                    %NewRecs = [],
+                    NewAcc = NewRecs ++ Acc,
+                    {DateTime, [], NewAcc};
                 undefined ->
                     {BsrTime, [AisRec|PendingRecs], Acc}
             end
@@ -71,4 +78,52 @@ bsr_time_delta(DT1, DT2) ->
     S2 = calendar:datetime_to_gregorian_seconds(DT2),
     S1 - S2.
 
+%% @doc Convert a list of pending records to a list of time-tagged tuples.
+map_pending_recs(BsrTime, BsrDelta, PendingRecs) when 
+        is_integer(BsrDelta),  BsrDelta > 0, BsrDelta < 60 ->
+    io:format("map_pending_recs ~p, BsrDelta ~p~n", [BsrTime, BsrDelta]),
+    F = fun(Rec) ->
+            time_tagged_tuple(BsrTime, Rec)
+        end,
+    lists:filtermap(F, PendingRecs); 
+map_pending_recs(_, _, PendingRecs) ->
+    F = fun(Rec) ->
+            time_tagged_tuple(undefined, Rec)
+        end,
+    lists:filtermap(F, PendingRecs).
+
+%% Helper function to use with filtermap to build a list of time-tagged 
+%% tuples, skipping over records that have not decoded properly.
+time_tagged_tuple(undefined, {ok, AisRec}) ->
+    {true, {undefined, AisRec}};
+time_tagged_tuple(BsrTime, {ok, AisRec}) ->
+    TimeTag = calc_time_tag(BsrTime, {ok, AisRec}),    
+    io:format("BsrTime ~p, Time tag: ~p~n", [BsrTime, TimeTag]),
+    {true, {TimeTag, AisRec}};
+time_tagged_tuple(_, _) ->
+    false.
+
+calc_time_tag(BsrTime, AisRec) ->
+    S1 = calendar:datetime_to_gregorian_seconds(BsrTime),
+    case extract_datetime(AisRec) of
+        {{_,_,_},{_,_,_}} = DateTime -> 
+            io:format("BSR, DateTime ~p~n", [DateTime]),
+            DateTime;
+        {seconds, Secs} ->
+            {{_,_,_},{_,_,BsrSecs}} = BsrTime,
+            SecsDiff = secs_diff(Secs, BsrSecs),
+            io:format("SecsDiff ~p~n", [SecsDiff]),
+            S2 = S1 + SecsDiff,
+            calendar:gregorian_seconds_to_datetime(S2);
+        undefined ->
+            undefined
+    end.
+
+%% Calculate the difference in seconds between 2 seconds fields (from a 
+%% datetime, assuming that the datetimes are separated by less than one 
+%% minute).
+secs_diff(S1, S2) when S1 >= S2 ->
+    S1 - S2;
+secs_diff(S1, S2) ->
+    60 + S1 - S2.
 
