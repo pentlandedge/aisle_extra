@@ -16,24 +16,39 @@
 
 -module(ais_json).
 
--export([tagged_ais_to_json/1]).
+-export([tagged_ais_to_json/1, mmsi_cnb_map_to_json/1]).
 
 %% Function to convert a list of decoded AIS records to JSON. Consumes the 
 %% tagged form e.g. {ok, #ais{}} and steps over any sentences that 
 %% failed to decode.
 tagged_ais_to_json(AisRecs) ->
-    CnbList = aisle:extract_cnb_records(AisRecs),
+    AisCnbList = aisle:extract_cnb_records(AisRecs),
+    ais_cnb_to_geojson(AisCnbList).
+
+%% Convert a map containing MMSI => CNB pairs to GeoJSON.
+mmsi_cnb_map_to_json(CnbMap) when is_map(CnbMap) ->
+    CnbList = maps:values(CnbMap),
     cnb_to_geojson(CnbList).
 
-%% Function to convert a list of CNB records to GeoJSON. 
-cnb_to_geojson(CnbList) when is_list(CnbList)  ->
-    PrepList = lists:map(fun cnb_prep/1, CnbList),
+%% Function to convert a list of AIS records containing CNB records to GeoJSON. 
+ais_cnb_to_geojson(AisCnbList) when is_list(AisCnbList)  ->
+    PrepList = lists:map(fun ais_cnb_prep/1, AisCnbList),
     jsx:encode([{<<"data">>, PrepList}]).
+
+%% Function to convert a list of AIS records containing CNB records to GeoJSON. 
+cnb_to_geojson(CnbList) when is_list(CnbList)  ->
+    FeatureList = lists:map(fun cnb_prep/1, CnbList),
+    jsx:encode([{<<"type">>,<<"FeatureCollection">>},
+                {<<"features">>, FeatureList}]).
 
 %% Collect the relevant data into a structure suitable for encoding using
 %% the jsx library.
-cnb_prep(AISrec) -> 
+ais_cnb_prep(AISrec) -> 
     CNB = aisle:get_data(AISrec),
+    cnb_prep(CNB).
+
+%% Convert the CNB record to a form suitable for JSON conversion.
+cnb_prep(CNB) ->
     Timestamp = aisle:get_timestamp(CNB),
     Lat = aisle:get_latitude(CNB),
     Lon = aisle:get_longitude(CNB),
