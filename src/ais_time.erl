@@ -38,8 +38,37 @@ extract_time_info(AisRecs) when is_list(AisRecs) ->
 %% less than one minute can be unambiguously placed on a timeline. 
 construct_timeline(AisRecs) when is_list(AisRecs) ->
     F = fun(AisRec, {BsrTime, PendingRecs, Acc}) ->
-            {BsrTime, [AisRec|PendingRecs], Acc}
+            case extract_bsrtime(AisRec) of
+                {ok, DateTime} -> 
+                    io:format("DateTime ~p~n", [DateTime]),
+                    Diff = bsr_time_delta(DateTime, BsrTime), 
+                    io:format("Diff ~p~n", [Diff]),
+                    {DateTime, [AisRec|PendingRecs], Acc};
+                undefined ->
+                    {BsrTime, [AisRec|PendingRecs], Acc}
+            end
         end,
     % This ignores the last set of records which have no BSR.
     {_LastBsrTime, _RemRecs, RevRecs} = lists:foldl(F, {undefined, [], []}, AisRecs),
     lists:reverse(RevRecs).
+
+%% @doc Convenience wrapper to fetch a base station report time. Returns 
+%% undefined if it is not a BSR.
+extract_bsrtime(AisRec) ->
+    case extract_datetime(AisRec) of
+        {{_,_,_},{_,_,_}} = DateTime -> 
+            {ok, DateTime};
+        _ -> 
+            undefined 
+    end.
+
+bsr_time_delta(undefined, _) -> 
+    undefined;
+bsr_time_delta(_, undefined) -> 
+    undefined;
+bsr_time_delta(DT1, DT2) -> 
+    S1 = calendar:datetime_to_gregorian_seconds(DT1),
+    S2 = calendar:datetime_to_gregorian_seconds(DT2),
+    S1 - S2.
+
+
