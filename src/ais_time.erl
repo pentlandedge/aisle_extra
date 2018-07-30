@@ -43,16 +43,18 @@ construct_timeline(AisRecs) when is_list(AisRecs) ->
             case extract_bsrtime(AisRec) of
                 {ok, DateTime} -> 
                     Delta = bsr_time_delta(DateTime, BsrTime), 
-                    NewRecs = map_pending_recs(BsrTime, Delta, PendingRecs),
+                    NewRecs = map_pending_recs(BsrTime, Delta, [AisRec|PendingRecs]),
                     NewAcc = NewRecs ++ Acc,
                     {DateTime, [], NewAcc};
                 undefined ->
                     {BsrTime, [AisRec|PendingRecs], Acc}
             end
         end,
-    % This ignores the last set of records which have no BSR.
-    {_LastBsrTime, _RemRecs, RevRecs} = lists:foldl(F, {undefined, [], []}, AisRecs),
-    lists:reverse(RevRecs).
+    {_LastBsrTime, RemRecs, RevRecs} = lists:foldl(F, {undefined, [], []}, AisRecs),
+    % Map the remaining records which we cannot fix in time.
+    MappedRemRecs = map_pending_recs(undefined, undefined, RemRecs),
+    FullList = MappedRemRecs ++ RevRecs,
+    lists:reverse(FullList).
 
 %% @doc Convenience wrapper to fetch a base station report time. Returns 
 %% undefined if it is not a BSR.
