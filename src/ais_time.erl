@@ -42,13 +42,8 @@ construct_timeline(AisRecs) when is_list(AisRecs) ->
     F = fun(AisRec, {BsrTime, PendingRecs, Acc}) ->
             case extract_bsrtime(AisRec) of
                 {ok, DateTime} -> 
-                    io:format("DateTime ~p~n", [DateTime]),
                     Delta = bsr_time_delta(DateTime, BsrTime), 
-                    io:format("Delta ~p~n", [Delta]),
-                    io:format("AisRec: ~p~n", [AisRec]),
                     NewRecs = map_pending_recs(BsrTime, Delta, PendingRecs),
-                    io:format("NewRecs ~p~n", [NewRecs]),
-                    %NewRecs = [],
                     NewAcc = NewRecs ++ Acc,
                     {DateTime, [], NewAcc};
                 undefined ->
@@ -81,7 +76,6 @@ bsr_time_delta(DT1, DT2) ->
 %% @doc Convert a list of pending records to a list of time-tagged tuples.
 map_pending_recs(BsrTime, BsrDelta, PendingRecs) when 
         is_integer(BsrDelta),  BsrDelta > 0, BsrDelta < 60 ->
-    io:format("map_pending_recs ~p, BsrDelta ~p~n", [BsrTime, BsrDelta]),
     F = fun(Rec) ->
             time_tagged_tuple(BsrTime, Rec)
         end,
@@ -98,7 +92,6 @@ time_tagged_tuple(undefined, {ok, AisRec}) ->
     {true, {undefined, AisRec}};
 time_tagged_tuple(BsrTime, {ok, AisRec}) ->
     TimeTag = calc_time_tag(BsrTime, {ok, AisRec}),    
-    io:format("BsrTime ~p, Time tag: ~p~n", [BsrTime, TimeTag]),
     {true, {TimeTag, AisRec}};
 time_tagged_tuple(_, _) ->
     false.
@@ -107,12 +100,10 @@ calc_time_tag(BsrTime, AisRec) ->
     S1 = calendar:datetime_to_gregorian_seconds(BsrTime),
     case extract_datetime(AisRec) of
         {{_,_,_},{_,_,_}} = DateTime -> 
-            io:format("BSR, DateTime ~p~n", [DateTime]),
             DateTime;
         {seconds, Secs} ->
             {{_,_,_},{_,_,BsrSecs}} = BsrTime,
             SecsDiff = secs_diff(Secs, BsrSecs),
-            io:format("SecsDiff ~p~n", [SecsDiff]),
             S2 = S1 + SecsDiff,
             calendar:gregorian_seconds_to_datetime(S2);
         undefined ->
