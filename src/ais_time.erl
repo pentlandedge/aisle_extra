@@ -66,14 +66,12 @@ extract_bsrtime(AisRec) ->
             undefined 
     end.
 
-bsr_time_delta(undefined, _) -> 
-    undefined;
-bsr_time_delta(_, undefined) -> 
-    undefined;
-bsr_time_delta(DT1, DT2) -> 
+bsr_time_delta({{_,_,_},{_,_,_}} = DT1, {{_,_,_},{_,_,_}} = DT2) -> 
     S1 = calendar:datetime_to_gregorian_seconds(DT1),
     S2 = calendar:datetime_to_gregorian_seconds(DT2),
-    S1 - S2.
+    S1 - S2;
+bsr_time_delta(_, _) -> 
+    undefined.
 
 %% @doc Convert a list of pending records to a list of time-tagged tuples.
 map_pending_recs(BsrTime, BsrDelta, PendingRecs) when 
