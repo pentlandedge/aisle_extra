@@ -2,23 +2,25 @@
 Extra utilities for manipulating and converting AIS data.
 
 ## Dependencies
-The library is intended to be used in conjunction with the core AIS decoder library aisle. The rebar tool is used to fetch dependencies, so it is also necessary to have a copy of rebar available on the path. Fetching dependencies (from the project root directory):
-```
-# rebar get-deps
-```
+The library is intended to be used in conjunction with the core AIS decoder library aisle. It also uses the jsx library for JSON conversion.
 
-## Building
-It is necessary to have Erlang installed, and the compiler erlc available on the path. The rebar tool is used to control the build process. The software can be built (on a Linux platform) using rebar:
+## Pre-requisites
+
+It is necessary to have a recent version of Erlang, the rebar3 build tool and (optionally) a make utiility installed in order to build the software.
+
+## Building and runnning the unit tests
+The software can be built (on a Linux platform) as follows:
 ```
-# rebar compile
+# make 
 ```
+This will fetch the dependencies, run the unit tests, generate module documentation and run the dialyzer static analysis tool.
 
 ## Decoding AIS sentences and converting to JSON.
 This example shows an interactive session in the Erlang shell, decoding some recorded AIS data supplied by the aisle library.
 
 From the project root directory, start the Erlang shell:
 ```
-rebar shell
+rebar3 shell
 ```
 
 Parse the supplied log file containing AIS sentences (this assumes that the AIS library is located in deps/aisle):
