@@ -1,0 +1,8 @@
+[{<<"aisle">>,
+  {git,"https://github.com/pentlandedge/aisle.git",
+       {ref,"3b172fdb2ca788333bd1f0a4eaeab959e7fbe8be"}},
+  0},
+ {<<"jsx">>,
+  {git,"https://github.com/talentdeficit/jsx.git",
+       {ref,"45ffea21a6863c58fb7da1f937e868916ff68b27"}},
+  0}].
