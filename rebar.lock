@@ -1,6 +1,6 @@
 [{<<"aisle">>,
   {git,"https://github.com/pentlandedge/aisle.git",
-       {ref,"e6672f97dcaeab882804df65b32767865eeb6618"}},
+       {ref,"c6a2a6e6dea6da3e92bcc48d7661e292babf6c18"}},
   0},
  {<<"jsx">>,
   {git,"https://github.com/talentdeficit/jsx.git",

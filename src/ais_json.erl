@@ -16,7 +16,7 @@
 
 -module(ais_json).
 
--export([tagged_ais_to_json/1, mmsi_cnb_map_to_json/1]).
+-export([tagged_ais_to_json/1, tagged_ais_to_json2/1, mmsi_cnb_map_to_json/1]).
 
 %% Function to convert a list of decoded AIS records to JSON. Consumes the 
 %% tagged form e.g. {ok, #ais{}} and steps over any sentences that 
@@ -24,6 +24,27 @@
 tagged_ais_to_json(AisRecs) ->
     AisCnbList = aisle:extract_cnb_records(AisRecs),
     ais_cnb_to_geojson(AisCnbList).
+
+tagged_ais_to_json2(AisRecs) ->
+    GoodRecs = extract_valid_recs(AisRecs),
+    GoodRecs.
+
+extract_valid_recs(AisRecs) ->
+    F = fun(Rec, Acc) ->
+            case tagged_ais_valid(Rec) of
+                true ->
+                    {ok, Ais} = Rec,
+                    [Ais|Acc];
+                false ->
+                    Acc
+            end
+        end,
+    Rev = lists:foldl(F, [], AisRecs),
+    lists:reverse(Rev).
+
+tagged_ais_valid({ok, A}) ->
+    aisle:is_ais_rec(A);
+tagged_ais_valid(_)            -> false.
 
 %% Convert a map containing MMSI => CNB pairs to GeoJSON.
 mmsi_cnb_map_to_json(CnbMap) when is_map(CnbMap) ->
