@@ -27,7 +27,7 @@ tagged_ais_to_json(AisRecs) ->
 
 tagged_ais_to_json2(AisRecs) ->
     GoodRecs = extract_valid_recs(AisRecs),
-    GoodRecs.
+    ais_to_geojson(GoodRecs).
 
 extract_valid_recs(AisRecs) ->
     F = fun(Rec, Acc) ->
@@ -84,3 +84,11 @@ gen_cnb_geojson(TimeUtc, Lat, Lon, MMSI) ->
                          {<<"mmsi">>, MMSI}]},
      {<<"geometry">>, [{<<"type">>, <<"Point">>},
                        {<<"coordinates">>, [Lon, Lat]}]}].
+
+ais_to_feature(AisRec) ->
+    [{<<"type">>, <<"Feature">>},
+     {<<"properties">>, []},
+     {<<"geometry">>, []}].
+
+ais_to_geojson(AisRecs) ->
+    lists:map(fun ais_to_feature/1, AisRecs).
