@@ -85,7 +85,7 @@ gen_cnb_geojson(TimeUtc, Lat, Lon, MMSI) ->
      {<<"geometry">>, [{<<"type">>, <<"Point">>},
                        {<<"coordinates">>, [Lon, Lat]}]}].
 
-ais_to_feature(AisRec) ->
+ais_to_feature(_AisRec) ->
     [{<<"type">>, <<"Feature">>},
      {<<"properties">>, []},
      {<<"geometry">>, []}].
