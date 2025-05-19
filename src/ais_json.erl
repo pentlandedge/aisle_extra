@@ -91,4 +91,6 @@ ais_to_feature(_AisRec) ->
      {<<"geometry">>, []}].
 
 ais_to_geojson(AisRecs) ->
-    lists:map(fun ais_to_feature/1, AisRecs).
+    FeatureList = lists:map(fun ais_to_feature/1, AisRecs),
+    jsx:encode([{<<"type">>,<<"FeatureCollection">>},
+                {<<"features">>, FeatureList}]).
