@@ -88,17 +88,11 @@ gen_cnb_geojson(TimeUtc, Lat, Lon, MMSI) ->
 ais_to_feature(AisRec) ->
     case aisle:get_msg_id(AisRec) of
         1 ->
-            [{<<"type">>, <<"Feature">>},
-             {<<"properties">>, []},
-             {<<"geometry">>, []}];
+            ais_cnb_prep(AisRec);
         2 ->
-            [{<<"type">>, <<"Feature">>},
-             {<<"properties">>, []},
-             {<<"geometry">>, []}];
+            ais_cnb_prep(AisRec);
         3 ->
-            [{<<"type">>, <<"Feature">>},
-             {<<"properties">>, []},
-             {<<"geometry">>, []}];
+            ais_cnb_prep(AisRec);
         _ ->
             [{<<"type">>, <<"Feature">>},
              {<<"properties">>, []},
