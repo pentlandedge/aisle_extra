@@ -85,6 +85,15 @@ gen_cnb_geojson(TimeUtc, Lat, Lon, MMSI) ->
      {<<"geometry">>, [{<<"type">>, <<"Point">>},
                        {<<"coordinates">>, [Lon, Lat]}]}].
 
+ais_bsr_prep(AisRec) ->
+    BSR = aisle:get_data(AisRec),
+    bsr_prep(BSR).
+
+bsr_prep(_BSR) ->
+    [{<<"type">>, <<"Feature">>},
+     {<<"properties">>, []},
+     {<<"geometry">>, []}].
+
 ais_to_feature(AisRec) ->
     case aisle:get_msg_id(AisRec) of
         1 ->
@@ -93,6 +102,8 @@ ais_to_feature(AisRec) ->
             ais_cnb_prep(AisRec);
         3 ->
             ais_cnb_prep(AisRec);
+        4 ->
+            ais_bsr_prep(AisRec);
         _ ->
             [{<<"type">>, <<"Feature">>},
              {<<"properties">>, []},
