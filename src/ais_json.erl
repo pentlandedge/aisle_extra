@@ -85,10 +85,26 @@ gen_cnb_geojson(TimeUtc, Lat, Lon, MMSI) ->
      {<<"geometry">>, [{<<"type">>, <<"Point">>},
                        {<<"coordinates">>, [Lon, Lat]}]}].
 
-ais_to_feature(_AisRec) ->
-    [{<<"type">>, <<"Feature">>},
-     {<<"properties">>, []},
-     {<<"geometry">>, []}].
+ais_to_feature(AisRec) ->
+    case aisle:get_msg_id(AisRec) of
+        1 ->
+            [{<<"type">>, <<"Feature">>},
+             {<<"properties">>, []},
+             {<<"geometry">>, []}];
+        2 ->
+            [{<<"type">>, <<"Feature">>},
+             {<<"properties">>, []},
+             {<<"geometry">>, []}];
+        3 ->
+            [{<<"type">>, <<"Feature">>},
+             {<<"properties">>, []},
+             {<<"geometry">>, []}];
+        _ ->
+            [{<<"type">>, <<"Feature">>},
+             {<<"properties">>, []},
+             {<<"geometry">>, []}]
+    end.
+
 
 ais_to_geojson(AisRecs) ->
     FeatureList = lists:map(fun ais_to_feature/1, AisRecs),
