@@ -96,8 +96,8 @@ bsr_prep(BSR) ->
                          {<<"type">>, <<"BSR">>}]},
      {<<"geometry">>, []}].
 
-datetime_to_timestamp({{Y,M,D},{_H,_M,_S}}) ->
-    lists:flatten(io_lib:format("~p-~2..0B-~2..0B", [Y, M, D])).
+datetime_to_timestamp({{Y,M,D},{H,M,S}}) ->
+    lists:flatten(io_lib:format("~p-~2..0B-~2..0BT~2..0B:~2..0B:~2..0BZ", [Y, M, D, H, M, S])).
 
 ais_to_feature(AisRec) ->
     case aisle:get_msg_id(AisRec) of
