@@ -89,10 +89,15 @@ ais_bsr_prep(AisRec) ->
     BSR = aisle:get_data(AisRec),
     bsr_prep(BSR).
 
-bsr_prep(_BSR) ->
+bsr_prep(BSR) ->
+    DateTime = aisle:get_bsr_datetime(BSR), 
     [{<<"type">>, <<"Feature">>},
-     {<<"properties">>, []},
+     {<<"properties">>, [{<<"timestamp">>, datetime_to_timestamp(DateTime)},
+                         {<<"type">>, <<"BSR">>}]},
      {<<"geometry">>, []}].
+
+datetime_to_timestamp({{Y,M,D},{_H,_M,_S}}) ->
+    lists:flatten(io_lib:format("~p-~2..0B-~2..0B", [Y, M, D])).
 
 ais_to_feature(AisRec) ->
     case aisle:get_msg_id(AisRec) of
