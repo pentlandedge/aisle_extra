@@ -91,9 +91,11 @@ ais_bsr_prep(AisRec) ->
 
 bsr_prep(BSR) ->
     DateTime = aisle:get_bsr_datetime(BSR), 
+    MMSI = aisle:get_bsr_mmsi(BSR), 
     [{<<"type">>, <<"Feature">>},
      {<<"properties">>, [{<<"timestamp">>, datetime_to_timestamp(DateTime)},
-                         {<<"type">>, <<"BSR">>}]},
+                         {<<"type">>, <<"BSR">>},
+                         {<<"mmsi">>, MMSI}]},
      {<<"geometry">>, []}].
 
 datetime_to_timestamp({{Y,M,D},{H,M,S}}) ->
