@@ -92,9 +92,11 @@ ais_bsr_prep(AisRec) ->
 bsr_prep(BSR) ->
     DateTime = aisle:get_bsr_datetime(BSR), 
     MMSI = aisle:get_bsr_mmsi(BSR), 
+    RI = aisle:repeat_indicator_to_list(aisle:get_bsr_repeat_indicator(BSR)),
     [{<<"type">>, <<"Feature">>},
      {<<"properties">>, [{<<"timestamp">>, datetime_to_timestamp(DateTime)},
                          {<<"type">>, <<"BSR">>},
+                         {<<"repeat_indicator">>,  RI},
                          {<<"mmsi">>, MMSI}]},
      {<<"geometry">>, []}].
 
