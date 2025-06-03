@@ -93,12 +93,19 @@ bsr_prep(BSR) ->
     DateTime = aisle:get_bsr_datetime(BSR), 
     MMSI = aisle:get_bsr_mmsi(BSR), 
     RI = aisle:repeat_indicator_to_list(aisle:get_bsr_repeat_indicator(BSR)),
+    Lat = aisle:get_bsr_latitude(BSR),
+    Lon = aisle:get_bsr_longitude(BSR),
+    FixType = aisle:epfd_fix_type_to_list(aisle:get_bsr_type_of_epfd(BSR)),
+    Raim = aisle:raim_to_list(aisle:get_bsr_raim_flag(BSR)),
     [{<<"type">>, <<"Feature">>},
      {<<"properties">>, [{<<"timestamp">>, datetime_to_timestamp(DateTime)},
                          {<<"type">>, <<"BSR">>},
                          {<<"repeat_indicator">>,  RI},
-                         {<<"mmsi">>, MMSI}]},
-     {<<"geometry">>, []}].
+                         {<<"mmsi">>, MMSI},
+                         {<<"epfd_fix_type">>, FixType},
+                         {<<"raim_flag">>, Raim}]},
+     {<<"geometry">>, [{<<"type">>, <<"Point">>},
+                       {<<"coordinates">>, [Lon, Lat]}]}].
 
 datetime_to_timestamp({{Y,M,D},{H,M,S}}) ->
     lists:flatten(io_lib:format("~p-~2..0B-~2..0BT~2..0B:~2..0B:~2..0BZ", [Y, M, D, H, M, S])).
