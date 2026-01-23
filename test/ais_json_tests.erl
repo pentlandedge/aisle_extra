@@ -26,8 +26,7 @@ ais_checks() ->
     Sentences = sample_ais(),
     AisRecs = lists:map(fun aisle:decode/1, Sentences),
     Json = ais_json:tagged_ais_to_json(AisRecs),
-    [].
-    %[?_assertEqual(ok, Json)].
+    [?_assert(is_binary(Json))].
 
 cnb_checks() ->
     [].
